@@ -667,33 +667,18 @@ public class PathfindingMenuController implements Initializable {
         //Adds all of the entrances/exits to the list
         List<String> fullPath = new ArrayList<>();
         List<Node> category = new ArrayList<>();
-        for (Node node : nodesId.values()) {
-            if (node.getNodeType().equals("EXIT") && (node.getBuilding().equals(nodesId.get(hmLongName.get(getStartLocation())).getBuilding()) || (node.getBuilding().equals(nodesId.get(hmLongName.get(getEndLocation())).getBuilding())))) {
-               System.out.println(nodesId.get(hmLongName.get(getStartLocation())).getBuilding());
-               System.out.println(nodesId.get(hmLongName.get(getEndLocation())).getBuilding());
-                category.add(node);
-            }
-        }
-        System.out.println(category);
 
         //If its the starting node that's outside, make a path from that node to the door and the door to the destination
         if (hmLongName.get(getStartLocation()).contains("PARK")) {
-
-            //System.out.println(nodesId.get(hmLongName.get(getEndLocation())).getBuilding());
-
-            for (Node node : nodesId.values()) {
-
+            //add only the exits in the same building as the end location
+           for (Node node : nodesId.values()) {
                 if (node.getNodeType().equals("EXIT") && (node.getBuilding().equals(nodesId.get(hmLongName.get(getEndLocation())).getBuilding()))){
                     category.add(node);
                 }
             }
-
-
+           //make paths from the start location to the exit and then the exit to the end location
             Path path1 = AStar.shortestPathToNodeInList(hmLongName.get(getStartLocation()), category);
-            System.out.println(path1.getPath());
-
             Path path2 = AStar.findPath(path1.getPath().get(path1.getPath().size() - 1), hmLongName.get(getEndLocation()));
-
 
             //make the nodes into one list of all of the nodes to go to
             for (String node : path1.getPath()) {
@@ -703,16 +688,23 @@ public class PathfindingMenuController implements Initializable {
                 fullPath.add(node);
             }
 
-
             //find the total weight of the path
             double fullWeight = path1.getTotalPathCost() + path2.getTotalPathCost();
 
             //make the actual path
             aStarPath = new Path(fullPath, fullWeight);
-        } else if (hmLongName.get(getEndLocation()).contains("PARK")) {
+        }
+        else if (hmLongName.get(getEndLocation()).contains("PARK")) {
+            //add only exits from the building its starting in to the list
+            for (Node node : nodesId.values()) {
+                if (node.getNodeType().equals("EXIT") && (node.getBuilding().equals(nodesId.get(hmLongName.get(getStartLocation())).getBuilding()))){
+                    category.add(node);
+                }
+            }
 
             //path from end to exit
-            Path path1 = AStar.shortestPathToNodeInList(getEndLocation(), category);
+            Path path1 = AStar.shortestPathToNodeInList(hmLongName.get(getEndLocation()), category);
+
             //flip it so its from the exit to the end node
             List<String> backwardsList = path1.getPath();
             Collections.reverse(backwardsList);
@@ -735,7 +727,6 @@ public class PathfindingMenuController implements Initializable {
             aStarPath = new Path(fullPath, fullWeight);
         } else {
             aStarPath = AStar.findPath(hmLongName.get(getStartLocation()), hmLongName.get(getEndLocation()));
-            System.out.println(aStarPath.getPath());
         }
 
         List<String> AstarPath = aStarPath.getPath();
