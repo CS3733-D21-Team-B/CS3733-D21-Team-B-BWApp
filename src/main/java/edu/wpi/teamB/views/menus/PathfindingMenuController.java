@@ -653,21 +653,21 @@ public class PathfindingMenuController implements Initializable {
         Path aStarPath = new Path();
 
         //Adds all of the entrances/exits to the list
-        List<Node> category = null;
+        List<String> fullPath = new ArrayList<>();
+        List<Node> category = new ArrayList<>();
         for (Node node : nodesId.values()) {
-            if (node.getNodeID().contains("EXIT")) {
+            if (node.getNodeType().equals("EXIT")) {
                 category.add(node);
             }
         }
 
         //If its the starting node that's outside, make a path from that node to the door and the door to the destination
         if (hmLongName.get(getStartLocation()).contains("PARK")){
-            Path path1 = AStar.shortestPathToNodeInList(getStartLocation(), category);
-            Path path2 = AStar.findPath(path1.getPath().get(0), hmLongName.get(getEndLocation()));
+            Path path1 = AStar.shortestPathToNodeInList(hmLongName.get(getStartLocation()), category);
+            Path path2 = AStar.findPath(path1.getPath().get(path1.getPath().size()-1), hmLongName.get(getEndLocation()));
 
 
             //make the nodes into one list of all of the nodes to go to
-            List<String> fullPath = null;
             for(String node : path1.getPath()){
                 fullPath.add(node);
             }
@@ -679,11 +679,34 @@ public class PathfindingMenuController implements Initializable {
             //find the total weight of the path
             double fullWeight = path1.getTotalPathCost() + path2.getTotalPathCost();
 
+            //make the actual path
             aStarPath = new Path(fullPath, fullWeight);
         }
 
         else if (hmLongName.get(getEndLocation()).contains("PARK")){
 
+            //path from end to exit
+            Path path1 = AStar.shortestPathToNodeInList(getEndLocation(), category);
+            //flip it so its from the exit to the end node
+            List<String> backwardsList = path1.getPath();
+            Collections.reverse(backwardsList);
+            Path path1Reverse = new Path(backwardsList, path1.getTotalPathCost());
+
+            //path from beginning to end
+            Path path2 = AStar.findPath(hmLongName.get(getStartLocation()), path1.getPath().get(0));
+
+            //make it all one list
+            for(String node : path2.getPath()){
+                fullPath.add(node);
+            }
+            for(String node : path1Reverse.getPath()){
+                fullPath.add(node);
+            }
+
+            double fullWeight = path1Reverse.getTotalPathCost() + path2.getTotalPathCost();
+
+            //make the path
+            aStarPath = new Path(fullPath, fullWeight);
         }
 
         else{
