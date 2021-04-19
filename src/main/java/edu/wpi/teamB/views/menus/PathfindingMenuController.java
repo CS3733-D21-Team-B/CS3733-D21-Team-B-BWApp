@@ -650,7 +650,45 @@ public class PathfindingMenuController implements Initializable {
 
         Map<String, Node> nodesId = Graph.getGraph().getNodes();
         Map<String, String> hmLongName = makeLongToIDMap();
-        Path aStarPath = AStar.findPath(hmLongName.get(getStartLocation()), hmLongName.get(getEndLocation()));
+        Path aStarPath = new Path();
+
+        //Adds all of the entrances/exits to the list
+        List<Node> category = null;
+        for (Node node : nodesId.values()) {
+            if (node.getNodeID().contains("EXIT")) {
+                category.add(node);
+            }
+        }
+
+        //If its the starting node that's outside, make a path from that node to the door and the door to the destination
+        if (hmLongName.get(getStartLocation()).contains("PARK")){
+            Path path1 = AStar.shortestPathToNodeInList(getStartLocation(), category);
+            Path path2 = AStar.findPath(path1.getPath().get(0), hmLongName.get(getEndLocation()));
+
+
+            //make the nodes into one list of all of the nodes to go to
+            List<String> fullPath = null;
+            for(String node : path1.getPath()){
+                fullPath.add(node);
+            }
+            for(String node : path2.getPath()){
+                fullPath.add(node);
+            }
+
+
+            //find the total weight of the path
+            double fullWeight = path1.getTotalPathCost() + path2.getTotalPathCost();
+
+            aStarPath = new Path(fullPath, fullWeight);
+        }
+
+        else if (hmLongName.get(getEndLocation()).contains("PARK")){
+
+        }
+
+        else{
+        aStarPath = AStar.findPath(hmLongName.get(getStartLocation()), hmLongName.get(getEndLocation()));
+        }
 
         List<String> AstarPath = aStarPath.getPath();
 
