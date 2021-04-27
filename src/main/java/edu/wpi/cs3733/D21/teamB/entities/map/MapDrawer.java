@@ -73,6 +73,7 @@ public class MapDrawer implements PoppableManager {
         if (!nodeHolder.getChildren().contains(head)) {
             nodeHolder.getChildren().add(head);
         }
+        head.setVisible(true);
         head.setFill(Color.valueOf("#0067B1"));
         Graph.getGraph().updateGraph();
         List<String> sl = mc.getStopsList();
@@ -422,7 +423,7 @@ public class MapDrawer implements PoppableManager {
     public void removeAllPopups() {
         mepm.removeAllPopups();
         mppm.removeAllPopups();
-
+        head.setVisible(false);
         gpane.setGestureEnabled(true);
     }
 
